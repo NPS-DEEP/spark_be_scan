@@ -13,8 +13,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.conf.Configuration;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -35,13 +37,13 @@ public final class BEScanSplitReader
                          String, NullWritable> {
 
   // state
-  private final Path path;
-  private final FileSystem fileSystem;
-  private final String filename;
-  private final long fileSize;
-  private final long splitStart; // offset from start of file
-  private final long splitSize;
-  private bool isDone = false;
+  private Path path;
+  private FileSystem fileSystem;
+  private String filename;
+  private long fileSize;
+  private long splitStart; // offset from start of file
+  private int splitSize;
+  private boolean isDone = false;
   private String printableArtifacts; // formatted artifacts with \n between
 
   @Override
@@ -64,10 +66,13 @@ public final class BEScanSplitReader
     fileSize = fileSystem.getFileStatus(path).getLen();
 
     // splitStart
-    splitStart = ((FileSplit)inputSplit).getStart();
+    splitStart = ((FileSplit)split).getStart();
 
     // splitSize
-    splitSize = ((FileSplit)inputSplit).getLength();
+    splitSize = (int)((FileSplit)split).getLength();
+    if (splitSize != ((FileSplit)split).getLength()) {
+      throw new IOException("split size error");
+    }
   }
 
   @Override
@@ -88,15 +93,15 @@ public final class BEScanSplitReader
 
       // read the buffer from the split
       byte[] buffer = new byte[splitSize];
-      org.apache.hadoop.io.IOUtils.readFully(in, buffer, 0, count);
-      close(in);
+      org.apache.hadoop.io.IOUtils.readFully(in, buffer, 0, splitSize);
+      in.close();
 
       // scan the split
       ScanBuffer scanBuffer = new ScanBuffer();
-      printableArtifacts = scanBuffer.scan(filename, offset, buffer);
+      printableArtifacts = scanBuffer.scan(filename, splitStart, buffer);
 
       // maybe help GC
-      buffer = "";
+      buffer = new byte[0];
 
     } catch (Exception e) {
       printableArtifacts = "Error in BufferReader initialization file " +
@@ -127,45 +132,4 @@ public final class BEScanSplitReader
     // no action
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-  private void scanAsNeeded() throws IOException {
-
-    // scan buffers until we get artifacts
-    while (reader.hasNext() && scanner.empty()) {
-
-      // read next
-      BufferReader.BufferRecord record = reader.next();
-
-      // scan next
-      String success = scanner.scan(record.offset,
-                                    previous_buffer, record.buffer);
-      if (!success.equals("")) {
-        throw new IOException("Error: " + success);
-      }
-
-      // move current buffer to previous buffer
-      previous_buffer = record.buffer;
-    }
-  }
-*/
 

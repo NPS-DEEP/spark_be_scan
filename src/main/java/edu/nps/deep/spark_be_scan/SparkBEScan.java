@@ -38,11 +38,11 @@ public final class SparkBEScan {
   // ************************************************************
   public static class BEScanRawFileInputFormat
         extends org.apache.hadoop.mapreduce.lib.input.FileInputFormat<
-                         SerializableArtifact, NullWritable> {
+                         String, NullWritable> {
 
     // createRecordReader returns EmailReader
     @Override
-    public org.apache.hadoop.mapreduce.RecordReader<SerializableArtifact, NullWritable>
+    public org.apache.hadoop.mapreduce.RecordReader<String, NullWritable>
            createRecordReader(
                  org.apache.hadoop.mapreduce.InputSplit split,
                  org.apache.hadoop.mapreduce.TaskAttemptContext context)
@@ -141,7 +141,7 @@ public final class SparkBEScan {
       }
 
       // Transformation: create the JavaPairRDD for all the files and splits
-      JavaPairRDD<SerializableArtifact, NullWritable> pairRDD =
+      JavaPairRDD<String, NullWritable> pairRDD =
                                             sparkContext.newAPIHadoopRDD(
                configuration,                        // configuration
                BEScanRawFileInputFormat.class,       // F
@@ -154,8 +154,6 @@ public final class SparkBEScan {
       // perform foreach on keys
       pairRDD.foreach(new org.apache.spark.api.java.function.VoidFunction<
                      Tuple2<String, NullWritable>>() {
-
-        @override
         public void call(Tuple2<String, NullWritable> tuple) {
           System.out.println(tuple._1());
         }

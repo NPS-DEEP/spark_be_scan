@@ -38,7 +38,7 @@ configurations {
 }
 
 dependencies {
- compile files("../../../local/share/be_scan_jni.jar")
+ compile files("../../local/share/be_scan_jni.jar")
 
   //spark
   provided "org.apache.spark:spark-core_2.11:${sparkVersion}"
@@ -47,6 +47,6 @@ dependencies {
 
 task run3(overwrite: true, type: Exec, dependsOn: [assemble]) {
   executable = 'spark-submit'
-  args = ["--class","edu.nps.deep.spark_be_scan.SparkBEScan", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/big_data_test/spark_be_scan/build/libs/spark_be_scan-${version}.jar", "/home/bdallen/work/local/lib", "/user/tjandrze/DEEP/input"]
+  args = ["--class","edu.nps.deep.spark_be_scan.SparkBEScan", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/spark_be_scan/build/libs/spark_be_scan-${version}.jar", "/home/bdallen/work/local/lib", "/user/tjandrze/DEEP/input"]
 }
 
