@@ -10,7 +10,7 @@ project.ext {
 }
 
 jar {
-  baseName = 'be_scan_spark'
+  baseName = 'spark_be_scan'
   version =  version
   dependsOn configurations.runtime
   from {
@@ -39,34 +39,14 @@ configurations {
 
 dependencies {
  compile files("../../../local/share/be_scan_jni.jar")
-// compile files("../../local/share/be_scan_jni.jar")
 
   //spark
   provided "org.apache.spark:spark-core_2.11:${sparkVersion}"
-
-//  // http://stackoverflow.com/questions/20700053/how-to-add-local-jar-file-dependency-to-build-gradle-file
-//  compile name: '/home/bdallen/local/share/be_scan_jni.jar'
-//  runtime files('/home/bdallen/local/share/be_scan_jni.jar')
-//  compile file tree(dir:'/home/bdallen/zzzlocal/share/be_scan_jni.jar', include: '*.jar')
 }
 
-task run(overwrite: true, type: Exec, dependsOn: [assemble]) {
-  executable = 'spark-submit'
-  args = ["--class","edu.nps.deep.be_scan_spark.BEScanSpark", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/big_data_test/be_scan_spark/build/libs/be_scan_spark-${version}.jar", "/home/bdallen/local/lib", "/user/tjandrze/DEEP/input"]
-}
 
 task run3(overwrite: true, type: Exec, dependsOn: [assemble]) {
   executable = 'spark-submit'
-  args = ["--class","edu.nps.deep.be_scan_spark.BEScanSpark", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/big_data_test/be_scan_spark/build/libs/be_scan_spark-${version}.jar", "/home/bdallen/work/local/lib", "/user/tjandrze/DEEP/input"]
+  args = ["--class","edu.nps.deep.spark_be_scan.SparkBEScan", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/big_data_test/spark_be_scan/build/libs/spark_be_scan-${version}.jar", "/home/bdallen/work/local/lib", "/user/tjandrze/DEEP/input"]
 }
-
-task run4(overwrite: true, type: Exec, dependsOn: [assemble]) {
-  executable = 'spark-submit'
-  args = ["--class","edu.nps.deep.be_scan_spark.BEScanSpark", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/big_data_test/be_scan_spark/build/libs/be_scan_spark-${version}.jar", "/home/bdallen/work/local/lib", "/user/bdallen/email_dir"]
- }
-
-task run5(overwrite: true, type: Exec, dependsOn: [assemble]) {
-  executable = 'spark-submit'
-  args = ["--class","edu.nps.deep.be_scan_spark.BEScanSpark", "--master", "yarn", "--driver-memory", "7g", "--files", "/home/bdallen/log4j.properties", "/home/bdallen/work/gits/big_data_test/be_scan_spark/build/libs/be_scan_spark-${version}.jar", "/home/bdallen/work/local/lib", "/user/bdallen/images"]
- }
 
